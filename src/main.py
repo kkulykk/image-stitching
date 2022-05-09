@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imageio
 import imutils
+import feature_matcher
 cv2.ocl.setUseOpenCL(False)
 
 
@@ -45,7 +46,7 @@ ax1.set_xlabel("Query image", fontsize=14)
 ax2.imshow(train_image, cmap="gray")
 ax2.set_xlabel("Train image", fontsize=14)
 
-plt.show()
+# plt.show()
 
 
 """
@@ -78,8 +79,8 @@ keypoints_query_img, features_query_img = select_descriptor_methods(
     query_image_bw, FEATURE_EXTRACTOR)
 
 # Checking what we've got
-# print("Keypoints: ", keypoints_train_img)
-# print("Features: ", features_train_img)
+print("Keypoints: ", len(keypoints_train_img))
+print("Features: ", len(features_train_img[0]))
 
 # Checking what keypoint consists of
 for keypoint in keypoints_query_img:
@@ -117,7 +118,7 @@ ax2.set_xlabel("(b)", fontsize=14)
 
 plt.savefig("./output/" + FEATURE_EXTRACTOR + "_features_img_"+'.jpeg', bbox_inches='tight',
             dpi=300, format='jpeg')
-plt.show()
+# plt.show()
 
 
 """
@@ -155,7 +156,7 @@ def key_points_matching(features_train_img, features_query_img, method):
 
 
 def key_points_matching_KNN(features_train_img, features_query_img, ratio, method):
-    bf = create_matching_object(method, crossCheck=False)
+    bf = create_matching_object(method, crossCheck=True)
     # compute the raw matches and initialize the list of actual matches
     rawMatches = bf.knnMatch(features_train_img, features_query_img, k=2)
     print("Raw matches (knn):", len(rawMatches))
@@ -176,27 +177,32 @@ print(f"Drawing: {FEATURE_TO_MATCH} matched features Lines")
 
 fig = plt.figure(figsize=(20, 8))
 
-if FEATURE_TO_MATCH == 'BF':
-    matches = key_points_matching(
-        features_train_img, features_query_img, method=FEATURE_EXTRACTOR)
 
-    mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_image, keypoints_query_img, matches[:100],
-                                            None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+print(feature_matcher.brute_force_matcher(
+    list(keypoints_query_img), list(features_query_img), list(keypoints_train_img), list(features_train_img)))
 
-# Now for cross checking draw the feature-mapping lines also with KNN
-elif FEATURE_TO_MATCH == 'KNN':
-    matches = key_points_matching_KNN(
-        features_train_img, features_query_img, ratio=0.75, method=FEATURE_EXTRACTOR)
+# if FEATURE_TO_MATCH == 'BF':
+matches = key_points_matching(
+    features_train_img, features_query_img, method=FEATURE_EXTRACTOR)
+print(matches)
 
-    mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_image, keypoints_query_img, np.random.choice(matches, 100),
-                                            None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_image, keypoints_query_img, matches[:100],
+                                        None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+# # Now for cross checking draw the feature-mapping lines also with KNN
+# elif FEATURE_TO_MATCH == 'KNN':
+#     matches = key_points_matching_KNN(
+#         features_train_img, features_query_img, ratio=0.75, method=FEATURE_EXTRACTOR)
+
+#     mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_image, keypoints_query_img, np.random.choice(matches, 100),
+#                                             None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 
 plt.imshow(mapped_features_image)
 plt.axis('off')
 plt.savefig("./output/" + FEATURE_EXTRACTOR + "_matching_img_"+'.jpeg', bbox_inches='tight',
             dpi=300, optimize=True, format='jpeg')
-plt.show()
+# plt.show()
 
 
 """
@@ -270,4 +276,4 @@ plt.imshow(result)
 
 imageio.imwrite("./output/horizontal_panorama_img_"+'.jpeg', result)
 
-plt.show()
+# plt.show()
