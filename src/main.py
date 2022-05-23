@@ -178,16 +178,17 @@ print(f"Drawing: {FEATURE_TO_MATCH} matched features Lines")
 fig = plt.figure(figsize=(20, 8))
 
 
-print(feature_matcher.brute_force_matcher(
+print(feature_matcher.feature_matcher(
     list(keypoints_query_img), list(features_query_img), list(keypoints_train_img), list(features_train_img)))
+
 
 # if FEATURE_TO_MATCH == 'BF':
 matches = key_points_matching(
     features_train_img, features_query_img, method=FEATURE_EXTRACTOR)
-print(matches)
+print(len(matches))
 
-mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_image, keypoints_query_img, matches[:100],
-                                        None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+# mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_image, keypoints_query_img, matches[:100],
+#                                         None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 # # Now for cross checking draw the feature-mapping lines also with KNN
 # elif FEATURE_TO_MATCH == 'KNN':
@@ -198,10 +199,10 @@ mapped_features_image = cv2.drawMatches(train_image, keypoints_train_img, query_
 #                                             None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
 
-plt.imshow(mapped_features_image)
-plt.axis('off')
-plt.savefig("./output/" + FEATURE_EXTRACTOR + "_matching_img_"+'.jpeg', bbox_inches='tight',
-            dpi=300, optimize=True, format='jpeg')
+# plt.imshow(mapped_features_image)
+# plt.axis('off')
+# plt.savefig("./output/" + FEATURE_EXTRACTOR + "_matching_img_"+'.jpeg', bbox_inches='tight',
+#             dpi=300, optimize=True, format='jpeg')
 # plt.show()
 
 
