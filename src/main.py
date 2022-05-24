@@ -3,8 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imageio
 import imutils
+import ransac
 import feature_matcher
+
 cv2.ocl.setUseOpenCL(False)
+
 
 
 """
@@ -20,7 +23,7 @@ Importing train (image that needs to be transformed) and query images
 """
 
 train_image = cv2.imread(
-    "dataset/hotel/hotel-05.png")   # Returns in GBR
+    "/Users/user/UCU/Classes/LA/IS_Project/image-stitching/dataset/hotel/hotel-05.png")   # Returns in GBR
 train_image = cv2.cvtColor(
     train_image, cv2.COLOR_BGR2RGB)   # Converting to RGB
 # train_image = imutils.rotate_bound(train_image, 180) # Just 4 fun
@@ -29,7 +32,7 @@ train_image_bw = cv2.cvtColor(
 
 
 query_image = cv2.imread(
-    "dataset/hotel/hotel-06.png")   # Returns in GBR
+    "/Users/user/UCU/Classes/LA/IS_Project/image-stitching/dataset/hotel/hotel-06.png")   # Returns in GBR
 query_image = cv2.cvtColor(
     query_image, cv2.COLOR_BGR2RGB)   # Converting to RGB
 query_image_bw = cv2.cvtColor(
@@ -116,7 +119,7 @@ ax2.imshow(cv2.drawKeypoints(query_image_bw,
            keypoints_query_img, None, color=(0, 255, 0)))
 ax2.set_xlabel("(b)", fontsize=14)
 
-plt.savefig("./output/" + FEATURE_EXTRACTOR + "_features_img_"+'.jpeg', bbox_inches='tight',
+plt.savefig("/Users/user/UCU/Classes/LA/IS_Project/image-stitching/output/" + FEATURE_EXTRACTOR + "_features_img_"+'.jpeg', bbox_inches='tight',
             dpi=300, format='jpeg')
 # plt.show()
 
@@ -178,8 +181,9 @@ print(f"Drawing: {FEATURE_TO_MATCH} matched features Lines")
 fig = plt.figure(figsize=(20, 8))
 
 
-print(feature_matcher.feature_matcher(
-    list(keypoints_query_img), list(features_query_img), list(keypoints_train_img), list(features_train_img)))
+mtchs = feature_matcher.feature_matcher(
+    list(keypoints_query_img), list(features_query_img), list(keypoints_train_img), list(features_train_img))
+print(mtchs)
 
 
 # if FEATURE_TO_MATCH == 'BF':
@@ -239,7 +243,11 @@ def homography_stitching(keypoints_train_img, keypoints_query_img, matches, repr
     else:
         return None
 
+print("lesi's homography")
+H = ransac.ransac(mtchs, 4, 5, 0.9, 0.95)
+print(H)
 
+print("cv2 homography")
 M = homography_stitching(
     keypoints_train_img, keypoints_query_img, matches, reprojThresh=4)
 
@@ -275,6 +283,6 @@ plt.figure(figsize=(20, 10))
 plt.axis('off')
 plt.imshow(result)
 
-imageio.imwrite("./output/horizontal_panorama_img_"+'.jpeg', result)
+imageio.imwrite("/Users/user/UCU/Classes/LA/IS_Project/image-stitching/output/horizontal_panorama_img_"+'.jpeg', result)
 
 # plt.show()
