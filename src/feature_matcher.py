@@ -2,6 +2,7 @@
 Feature matching module
 """
 
+from unittest import result
 import numpy as np
 
 ratio_treshold = 0.8
@@ -16,40 +17,39 @@ def knn(descriptor_query, descriptors_train: list, k: int = 2) -> list:
         dist = np.linalg.norm(descriptor_query - descriptors_train[i])
         neighbors.append((dist, i))
     neighbors.sort()
-    # print(neighbors[:k])
-    return neighbors[:k]
+    if neighbors[0][0] < (ratio_treshold * neighbors[1][0]):
+        return neighbors[0][1]
+    else:
+        return -1
 
 
-def ratio_test(neighbors: list) -> bool:
-    """
-    Return true if the ratio between two nearest neighbors is below given threshold
-    """
-    return (neighbors[1][0] / neighbors[0][0]) > ratio_treshold
-
-
-def cross_check():
-    """
-    """
-    return
-
-
-def feature_matcher(features_query: list, descriptors_query: list, features_train: list, descriptors_train: list) -> list:
+def feature_matcher(features_query: list, descriptors_query: list, features_train: list, descriptors_train: list, crossCheck: bool = False) -> list:
     """
     Return list of all matches between two images in form (keypoint_1, keypoint_2)
     which denotes a keypoint from query image and its representative from
     train image respectively
     """
     print("\nStart matching features\n")
+    result1 = []
+    result2 = []
     result = []
-    used = []
     for i in range(len(descriptors_query)):
-        nearest_neighbors = knn(descriptors_query[i], descriptors_train)
-        if ratio_test(nearest_neighbors):
-            if features_query[i] not in used and features_train[nearest_neighbors[0][1]] not in used:
-                result.append(
-                    (features_query[i], features_train[nearest_neighbors[0][1]]))
-                used.append(
-                    features_query[i])
-                used.append(features_train[nearest_neighbors[0][1]])
+        nearest_neighbor = knn(descriptors_query[i], descriptors_train)
+        if nearest_neighbor != -1:
+            result1.append(
+                (features_train[nearest_neighbor], features_query[i]))
+    if crossCheck:
+        for i in range(len(descriptors_train)):
+            nearest_neighbor = knn(descriptors_train[i], descriptors_query)
+            if nearest_neighbor != -1:
+                result2.append(
+                    (features_query[nearest_neighbor], features_train[i]))
+
+        for i in result1:
+            if i in result2 or (i[1], i[0]) in result2:
+                result.append(i)
+    else:
+        result = result1
+
     print("\nEnd matching features\n")
     return result
