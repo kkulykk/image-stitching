@@ -15,7 +15,8 @@ def knn(descriptor_query, descriptors_train: list, k: int = 2) -> list:
     for i in range(len(descriptors_train)):
         dist = np.linalg.norm(descriptor_query - descriptors_train[i])
         neighbors.append((dist, i))
-        neighbors.sort
+    neighbors.sort()
+    # print(neighbors[:k])
     return neighbors[:k]
 
 
@@ -38,10 +39,17 @@ def feature_matcher(features_query: list, descriptors_query: list, features_trai
     which denotes a keypoint from query image and its representative from
     train image respectively
     """
+    print("\nStart matching features\n")
     result = []
+    used = []
     for i in range(len(descriptors_query)):
         nearest_neighbors = knn(descriptors_query[i], descriptors_train)
         if ratio_test(nearest_neighbors):
-            result.append(
-                (features_query[i], features_train[nearest_neighbors[0][1]]))
+            if features_query[i] not in used and features_train[nearest_neighbors[0][1]] not in used:
+                result.append(
+                    (features_query[i], features_train[nearest_neighbors[0][1]]))
+                used.append(
+                    features_query[i])
+                used.append(features_train[nearest_neighbors[0][1]])
+    print("\nEnd matching features\n")
     return result

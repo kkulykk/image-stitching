@@ -9,7 +9,6 @@ import feature_matcher
 cv2.ocl.setUseOpenCL(False)
 
 
-
 """
 TBD
 Description
@@ -23,7 +22,7 @@ Importing train (image that needs to be transformed) and query images
 """
 
 train_image = cv2.imread(
-    "/Users/user/UCU/Classes/LA/IS_Project/image-stitching/dataset/hotel/hotel-05.png")   # Returns in GBR
+    "dataset/hotel/hotel-00.png")   # Returns in GBR
 train_image = cv2.cvtColor(
     train_image, cv2.COLOR_BGR2RGB)   # Converting to RGB
 # train_image = imutils.rotate_bound(train_image, 180) # Just 4 fun
@@ -32,7 +31,7 @@ train_image_bw = cv2.cvtColor(
 
 
 query_image = cv2.imread(
-    "/Users/user/UCU/Classes/LA/IS_Project/image-stitching/dataset/hotel/hotel-06.png")   # Returns in GBR
+    "dataset/hotel/hotel-01.png")   # Returns in GBR
 query_image = cv2.cvtColor(
     query_image, cv2.COLOR_BGR2RGB)   # Converting to RGB
 query_image_bw = cv2.cvtColor(
@@ -119,8 +118,8 @@ ax2.imshow(cv2.drawKeypoints(query_image_bw,
            keypoints_query_img, None, color=(0, 255, 0)))
 ax2.set_xlabel("(b)", fontsize=14)
 
-plt.savefig("/Users/user/UCU/Classes/LA/IS_Project/image-stitching/output/" + FEATURE_EXTRACTOR + "_features_img_"+'.jpeg', bbox_inches='tight',
-            dpi=300, format='jpeg')
+# plt.savefig("/Users/user/UCU/Classes/LA/IS_Project/image-stitching/output/" + FEATURE_EXTRACTOR + "_features_img_"+'.jpeg', bbox_inches='tight',
+#             dpi=300, format='jpeg')
 # plt.show()
 
 
@@ -243,6 +242,7 @@ def homography_stitching(keypoints_train_img, keypoints_query_img, matches, repr
     else:
         return None
 
+
 print("lesi's homography")
 H = ransac.ransac(mtchs, 4, 5, 0.9, 0.95)
 print(H)
@@ -250,6 +250,8 @@ print(H)
 print("cv2 homography")
 M = homography_stitching(
     keypoints_train_img, keypoints_query_img, matches, reprojThresh=4)
+
+print(M)
 
 if M is None:
     print("Error!")
@@ -264,7 +266,7 @@ print(Homography_Matrix)
 # I can take the max from the 2 individual images.
 
 width = query_image.shape[1] + train_image.shape[1]
-print("width ", width)
+# print("width ", width)
 
 
 height = max(query_image.shape[0], train_image.shape[0])
@@ -273,7 +275,7 @@ height = max(query_image.shape[0], train_image.shape[0])
 
 # Now just plug that "Homography_Matrix"  into cv::warpedPerspective and I shall have a warped image1 into image2 frame
 
-result = cv2.warpPerspective(train_image, Homography_Matrix,  (width, height))
+result = cv2.warpPerspective(train_image, H,  (width, height))
 
 # The warpPerspective() function returns an image or video whose size is the same as the size of the original image or video. Hence set the pixels as per my query_photo
 
@@ -283,6 +285,7 @@ plt.figure(figsize=(20, 10))
 plt.axis('off')
 plt.imshow(result)
 
-imageio.imwrite("/Users/user/UCU/Classes/LA/IS_Project/image-stitching/output/horizontal_panorama_img_"+'.jpeg', result)
+imageio.imwrite(
+    "img"+'.jpeg', result)
 
 # plt.show()
