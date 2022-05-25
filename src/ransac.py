@@ -1,6 +1,5 @@
 import numpy as np
-from math import log, sqrt
-
+from math import log
 import random
 
 
@@ -8,12 +7,10 @@ def calculate_homography(homography_base):
     k = len(homography_base)
     cmatrix = [[0 for _ in range(k*2)] for _ in range(k*2)]
     query_vec = [0] * (k*2)
-    print('matches: ')
     for i in range(k):
         itv = 2 * i
         train_x, train_y = homography_base[i][0].pt
         query_x, query_y = homography_base[i][1].pt
-        print(homography_base[i][0].pt, homography_base[i][1].pt)
 
         cmatrix[itv][:3] = train_x, train_y, 1
         cmatrix[itv][6:] = train_x * query_x * (-1), train_y * query_x * (-1)
@@ -30,13 +27,15 @@ def count_inliers(homography, datapoints, num_datapoints, threshold):
     inliers = 0
     for i in range(num_datapoints):
         match = datapoints[i]
-        init_pos = np.array([match[0].pt[0], match[0].pt[1], 1])
+        init_pos = np.transpose(np.matrix([match[0].pt[0], match[0].pt[1], 1]))
+        expected_pos = np.transpose(np.matrix([match[1].pt[0], match[1].pt[1], 1]))
 
-        expected_pos = homography.dot(init_pos)
-        vec = [expected_pos[0] - match[1].pt[0], expected_pos[1] - match[1].pt[1]]
-        dist = sqrt(vec[0]**2 + vec[1]**2)
+        predicted_pos = np.dot(homography, init_pos)
+        predicted_pos = (1/predicted_pos.item(2))*predicted_pos
 
-        if dist < threshold:
+        dist = np.linalg.norm(expected_pos - predicted_pos)
+
+        if dist <= threshold:
             inliers += 1
 
     return inliers
@@ -46,16 +45,16 @@ def ransac(matched_points, sample_size, eps, inlier_prob, desired_prob):
     max_inlier_fit = [[], 0]
     num_matches = len(matched_points)
     acceptable_fit = desired_prob * num_matches
-    N_iterations = int(log(1 - desired_prob) / log(1 - inlier_prob ** sample_size))
+    N_iterations = 100
+    # N_iterations = int(log(1 - desired_prob) / log(1 - inlier_prob ** sample_size))
 
     for i in range(N_iterations):
-        sample_idx = random.sample(range(1, num_matches), 4)
+        sample_idx = random.sample(range(0, num_matches+1), sample_size)
         rand_samp = [matched_points[i] for i in sample_idx]
 
         sample_fit = calculate_homography(rand_samp)
 
         inliers = count_inliers(sample_fit, matched_points, num_matches, eps)
-
         if inliers >= acceptable_fit:
             return sample_fit
 

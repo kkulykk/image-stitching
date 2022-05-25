@@ -24,7 +24,7 @@ def ratio_test(neighbors: list) -> bool:
     """
     Return true if the ratio between two nearest neighbors is below given threshold
     """
-    return (neighbors[1][0] / neighbors[0][0]) < ratio_treshold
+    return (neighbors[1][0] / neighbors[0][0]) > ratio_treshold
 
 
 def cross_check():

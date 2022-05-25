@@ -251,8 +251,6 @@ print("cv2 homography")
 M = homography_stitching(
     keypoints_train_img, keypoints_query_img, matches, reprojThresh=4)
 
-print(M)
-
 if M is None:
     print("Error!")
 
@@ -275,7 +273,7 @@ height = max(query_image.shape[0], train_image.shape[0])
 
 # Now just plug that "Homography_Matrix"  into cv::warpedPerspective and I shall have a warped image1 into image2 frame
 
-result = cv2.warpPerspective(train_image, H,  (width, height))
+result = cv2.warpPerspective(train_image, Homography_Matrix,  (width, height))
 
 # The warpPerspective() function returns an image or video whose size is the same as the size of the original image or video. Hence set the pixels as per my query_photo
 
