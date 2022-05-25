@@ -54,22 +54,22 @@ PART 1 – Keypoints and features extraction
 sift = cv2.SIFT_create()
 
 keypoints_train_img, features_train_img = sift.detectAndCompute(
-    train_image_bw, None)
+    train_image, None)
 
 keypoints_query_img, features_query_img = sift.detectAndCompute(
-    query_image_bw, None)
+    query_image, None)
 
 
 if DEBUG:
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2,
                                    figsize=(20, 8), constrained_layout=False)
 
-    ax1.imshow(cv2.drawKeypoints(train_image_bw,
+    ax1.imshow(cv2.drawKeypoints(train_image,
                                  keypoints_train_img, None, color=(0, 255, 0)))
 
     ax1.set_xlabel("(a)", fontsize=14)
 
-    ax2.imshow(cv2.drawKeypoints(query_image_bw,
+    ax2.imshow(cv2.drawKeypoints(query_image,
                                  keypoints_query_img, None, color=(0, 255, 0)))
     ax2.set_xlabel("(b)", fontsize=14)
 
@@ -87,8 +87,8 @@ PART 3 – Constructing homography (RANSAC)
 """
 
 
-print("lesi's homography")
-H = ransac.ransac(mtchs, 4, 5, 0.9, 0.95)
+print("Calculating homography...")
+H = ransac.ransac(mtchs, 4, 5, 0.7, 0.95)
 print(H)
 
 
@@ -96,6 +96,8 @@ width = query_image.shape[1] + train_image.shape[1]
 
 
 height = max(query_image.shape[0], train_image.shape[0])
+
+print("Warping image...")
 
 result = cv2.warpPerspective(train_image, H,  (width, height))
 

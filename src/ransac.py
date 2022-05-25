@@ -19,7 +19,10 @@ def calculate_homography(homography_base):
             query_y * (-1), train_y * query_y * (-1)
         query_vec[itv], query_vec[itv + 1] = query_x, query_y
 
-    hom_coef = np.linalg.solve(cmatrix, query_vec)
+    try:
+        hom_coef = np.linalg.solve(cmatrix, query_vec)
+    except:
+        return
     hom_coef = np.reshape(np.append(hom_coef, [1]), (3, 3))
     return hom_coef
 
@@ -48,13 +51,16 @@ def ransac(matched_points, sample_size, eps, inlier_prob, desired_prob):
     num_matches = len(matched_points)
     acceptable_fit = desired_prob * num_matches
     N_iterations = 500
-    # N_iterations = int(log(1 - desired_prob) / log(1 - inlier_prob ** sample_size))
+    # N_iterations = int(log(1 - desired_prob) / log(1 - inlier_prob ** sample_size)) -- not large enough
 
     for i in range(N_iterations):
-        sample_idx = random.sample(range(0, num_matches+1), sample_size)
+        sample_idx = random.sample(range(0, num_matches), sample_size)
         rand_samp = [matched_points[i] for i in sample_idx]
 
         sample_fit = calculate_homography(rand_samp)
+
+        if sample_fit is None:
+            continue
 
         inliers = count_inliers(sample_fit, matched_points, num_matches, eps)
         if inliers >= acceptable_fit:
@@ -63,4 +69,4 @@ def ransac(matched_points, sample_size, eps, inlier_prob, desired_prob):
         if inliers > max_inlier_fit[1]:
             max_inlier_fit = [sample_fit, inliers]
 
-    return max_inlier_fit
+    return np.reshape(np.array(max_inlier_fit[0]), (3, 3))
