@@ -2,7 +2,6 @@
 Feature matching module
 """
 
-from unittest import result
 import numpy as np
 
 ratio_treshold = 0.8
@@ -10,7 +9,7 @@ ratio_treshold = 0.8
 
 def knn(descriptor_query, descriptors_train: list, k: int = 2) -> list:
     """
-    Return a list with k nearest neighbors for a given point using its' descriptors
+    Return an index of a corresponding keypoint to match, -1 if match was not found
     """
     neighbors = []
     for i in range(len(descriptors_train)):
@@ -29,7 +28,7 @@ def feature_matcher(features_query: list, descriptors_query: list, features_trai
     which denotes a keypoint from query image and its representative from
     train image respectively
     """
-    print("\nStart matching features\n")
+    print("\nStart matching features")
     result1 = []
     result2 = []
     result = []
@@ -51,5 +50,5 @@ def feature_matcher(features_query: list, descriptors_query: list, features_trai
     else:
         result = result1
 
-    print("\nEnd matching features\n")
+    print("End matching features\n")
     return result
