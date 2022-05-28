@@ -163,13 +163,15 @@ def warpTwoImages(src_img, dst_img, H, showstep=False):
 
 def get_images(path):
     images = []
+    paths = []
     for dirname, _, filenames in os.walk(path):
         for filename in filenames:
             if os.path.join(dirname, filename).endswith(".png") or os.path.join(dirname, filename).endswith(".jpeg"):
-                image = cv2.imread(os.path.join(dirname, filename))
-                image = cv2.cvtColor(
-                    image, cv2.COLOR_BGR2RGB)
-                images.append(image)
+                paths.append(os.path.join(dirname, filename))
+    paths.sort()
+    for i in paths:
+        image = cv2.imread(i)
+        images.append(image)
     if len(images) < 2:
         raise ValueError("Not enough images to stitch")
     print(f"{len(images)} images detected\n")

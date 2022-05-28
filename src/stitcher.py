@@ -3,9 +3,9 @@ import cv2
 import glob
 import imutils
 
-image_paths = glob.glob('dataset/goldengate/*.png')
+image_paths = glob.glob('./dataset/yard/*.png')
 images = []
-
+print(image_paths)
 
 for image in image_paths:
     img = cv2.imread(image)
@@ -13,11 +13,11 @@ for image in image_paths:
     cv2.imshow("Image", img)
 
 
-
 imageStitcher = cv2.Stitcher_create()
 
 
 error, stitched_img = imageStitcher.stitch(images)
+print(error)
 
 if not error:
 
