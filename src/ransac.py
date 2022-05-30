@@ -27,6 +27,7 @@ def calculate_homography(homography_base):
     return hom_coef
 
 
+
 def count_inliers(homography, datapoints, num_datapoints, threshold):
     inliers = 0
     for i in range(num_datapoints):
@@ -36,7 +37,10 @@ def count_inliers(homography, datapoints, num_datapoints, threshold):
             np.matrix([match[1].pt[0], match[1].pt[1], 1]))
 
         predicted_pos = np.dot(homography, init_pos)
-        predicted_pos = (1/predicted_pos.item(2))*predicted_pos
+            try:
+                predicted_pos = (1/predicted_pos.item(2))*predicted_pos
+            except:
+                continue
 
         dist = np.linalg.norm(expected_pos - predicted_pos)
 
